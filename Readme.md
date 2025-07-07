@@ -1,2 +1,2 @@
-# a backend application demostrating thw working of youtube.
+# a backend application demostrating the working of youtube.
 
