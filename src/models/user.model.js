@@ -38,7 +38,7 @@ const userSchema = new Schema(
                 ref: "Video",
             }
         ],
-        password: { //pending...
+        password: { //done.
             type: String,
             required: [true,'Password is required']
         },
@@ -60,7 +60,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 userSchema.methods.generateAccessToken = function () {
-    //jwt.sign(payloads, accesstoken, accesstokenexpiry)
+    //.sign takes 3 arguments: jwt.sign(payloads, accesstoken, accesstokenexpiry)
    return  jwt.sign(
     {
         _id: this._id,
