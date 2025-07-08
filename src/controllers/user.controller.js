@@ -16,7 +16,6 @@ const registerUser = asyncHandler(async (req, res) => {
   //return response
 
   const { fullname, email, username, password } = req.body;
-  console.log("email: ", email);
 
   if (
     [fullname, email, username, password].some((feild) => feild?.trim() === "")
@@ -25,7 +24,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   //check for existing user
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
 
@@ -35,10 +34,17 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //file url logic for saving avatar and cover image.
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+
   //as avatar image is manditory
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar image is required");
+  }
+  //check if cover image is present or not. 
+  let coverImageLocalPath;
+  if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+    coverImageLocalPath = req.files.coverImage[0].path;
   }
   //as we have the locak file path now we can upload the file to cloudinary
   const avtar = await uploadOnCloudinary(avatarLocalPath);
@@ -51,7 +57,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const user = await User.create({
     fullname,
     avatar: avtar.url,
-    coverImage: coverImage?.url || "",
+    coverImage: coverImage?.url || "", //as coverImage is not compulsery
     email,
     username: username.toLowerCase(),
     password,
@@ -66,7 +72,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!createdUser) {
     throw new ApiError(500, "something went wrong while adding the user");
   }
-
+  // console.log(res.files) //check if we have files and their path.
   return res
     .status(201)
     .json(new ApiResponse(200, createdUser, "User registered successfully"));
