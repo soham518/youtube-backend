@@ -167,7 +167,7 @@ const loginUser = asyncHandler(async (req, res) => {
 //controller for user logout
 
 const logoutUser = asyncHandler(async (req, res) => {
-  User.findByIdAndUpdate(
+  await User.findByIdAndUpdate(
     req.user._id,
     {
       $set: {
@@ -178,5 +178,9 @@ const logoutUser = asyncHandler(async (req, res) => {
       new: true,
     }
   );
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
 });
 export { loginUser, logoutUser, registerUser };
