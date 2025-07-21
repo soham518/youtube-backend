@@ -79,7 +79,7 @@ const registerUser = asyncHandler(async (req, res) => {
   ) {
     coverImageLocalPath = req.files.coverImage[0].path;
   }
-  //as we have the locak file path now we can upload the file to cloudinary
+  //as we have the location of file path now we can upload the file to cloudinary
   const avtar = await uploadOnCloudinary(avatarLocalPath);
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
@@ -286,6 +286,67 @@ const updateUserDetails = asyncHandler(
   })
 );
 
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar image is required");
+  }
+
+  avatar = await uploadOnCloudinary(avatarLocalPath);
+  if (!avatar.url) {
+    throw new ApiError(400, "error while uploading avatar image");
+  }
+ 
+
+
+   const user = await User.findByIdAndUpdate(
+     req.user?._id,
+     {
+       $set: {
+         //avatar is a total object returned by cloudinary and we just want to save the url to access image
+         avatar: avatar.url,
+       },
+     },
+     { new: true }
+   );
+  
+  return res
+  .status(200)
+  .json( new ApiResponse(200, user, "Avatar Image updated successfully"))
+
+});
+
+const updateUserCoverImage = asyncHandler(async (req,res) => {
+  const coverImageLocalPath = req.file?.path;
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "Cover image is required");
+  }
+
+  coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  if (!coverImage.url) {
+    throw new ApiError(400, "error while uploading cover image");
+  }
+ 
+
+   const user = await User.findByIdAndUpdate(
+     req.user?._id,
+     {
+       $set: {
+         //avatar is a object returned by cloudinary and we just want to save the url to access image
+         coverImage: avatar.url,
+       },
+     },
+     { new: true }
+   );
+  
+  return res
+  .status(200)
+  .json( new ApiResponse(200, user, "Cover Image updated successfully"))
+
+})
+
+
+
 //controller to get current user
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res.ApiResponse(200, req.user, "Current user fetched successfully");
@@ -293,8 +354,12 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 export {
   changeCurrentPassword,
+  getCurrentUser,
+  updateUserAvatar,
+  updateUserCoverImage,
   loginUser,
   logoutUser,
   refreshAccessToken,
   registerUser,
+  updateUserDetails,
 };
